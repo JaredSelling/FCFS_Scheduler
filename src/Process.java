@@ -10,6 +10,7 @@ public class Process implements Comparable<Process> {
     private int turnaroundTime;
     private int currentBurstIndex;
     private int currentIOIndex;
+    private String state;
 
     //Constructor
 
@@ -20,6 +21,7 @@ public class Process implements Comparable<Process> {
         this.ioTimes = ioTimes;
         this.currentBurstIndex = 0;
         this.currentIOIndex = 0;
+        this.state="READY";
     }
 
 
@@ -61,6 +63,9 @@ public class Process implements Comparable<Process> {
         return turnaroundTime;
     }
 
+    public String getState() {
+        return state;
+    }
 
     //Setters
 
@@ -84,6 +89,10 @@ public class Process implements Comparable<Process> {
         this.currentBurst = this.burstTimes[this.currentBurstIndex];
     }
 
+    public void decrementCurrentBurst() { this.currentBurst--;}
+
+    public void incrementCurrentBurst() { this.currentBurst++; }
+
     public void setCurrentIO() {
         this.currentIO = ioTimes[this.currentIOIndex];
     }
@@ -104,9 +113,13 @@ public class Process implements Comparable<Process> {
 
     public void incrementCurrentIOIndex() { this.currentIOIndex++; }
 
+    public void setState(String state) {
+        this.state = state;
+    }
+
     @Override
-    public int compareTo(Process process) {
-        int compareArrivalTime = ((Process) process).getArrivalTime();
+    public int compareTo(Process comparedProc) {
+        int compareArrivalTime = ((Process) comparedProc).getArrivalTime();
         return this.arrivalTime - compareArrivalTime;
     }
 }

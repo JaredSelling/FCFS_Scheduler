@@ -1,14 +1,14 @@
 import java.util.LinkedList;
 
-public class ReadyQueue<Process> {
+public class ReadyQueue<T extends Comparable<? super T>> {
 
-    private LinkedList<Process> readyQueue = new LinkedList<Process>();
+    private LinkedList<T> readyQueue = new LinkedList<T>();
 
-    public void enqueue(Process item) {
+    public void enqueue(T item) {
         readyQueue.addLast(item);
     }
 
-    public Process dequeue() {
+    public T dequeue() {
         return readyQueue.poll();
     }
 
@@ -23,10 +23,7 @@ public class ReadyQueue<Process> {
     public boolean isEmpty() { return readyQueue.isEmpty(); }
 
 
-    public Process getItem(int index) { return readyQueue.get(index);}
+    public T getItem(int index) { return readyQueue.get(index);}
 
-    public void printReadyQueue(ReadyQueue readyQueue) {
-
-    }
 
 }

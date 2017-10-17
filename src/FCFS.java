@@ -1,3 +1,5 @@
+import java.util.Collections;
+
 public class FCFS {
 
     public static void main(String[] args) {
@@ -23,31 +25,54 @@ public class FCFS {
         readyQueue.enqueue(P7);
         readyQueue.enqueue(P8);
 
+        //initialize timer
+        int curTime = 0;
+
         //get first process in queue and set its state to EXECUTING
+        Process curProc = readyQueue.dequeue();
+        curProc.setState("EXECUTING");
+
+        System.out.println("Currently executing: " + curProc.getId());
 
         //main loop.  Each iteration represents 1 time unit.
+        while(!readyQueue.isEmpty()) {
 
             //if state is EXECUTING
+            if(curProc.getState() == "EXECUTING") {
                 //if current burst > 0
+                if (curProc.getCurrentBurst() > 0) {
                     //decrement current burst
+                    curProc.decrementCurrentBurst();
+                }
 
-                //else if  current burst is 0
+                //if  current burst is 0
+                if (curProc.getCurrentBurst() <= 0) {
                     //increment process's cpu burst index
-                    //go out to I/O
+                    curProc.incrementCurrentBurst();
                     //set state to BLOCKING
-
+                    curProc.setState("BLOCKING");
+                }
+            }
 
             //if state is BLOCKING
+            if(curProc.getState() == "BLOCKING") {
                 //current process's new arrival time = current time + current io time
+                curProc.setArrivalTime(curTime + curProc.getCurrentIO());
                 //increment process's current io burst index
+                curProc.incrementCurrentIOIndex();
                 //set process's state to READY
-
+                curProc.setState("READY");
+            }
 
             //if state is READY
+            if(curProc.getState() == "READY") {
                 //add process to end of ready queue
+                readyQueue.enqueue(curProc);
                 //rearrange ready queue based on arrival times
+                Collections.sort(readyQueue);
                 //get next process
-
+            }
+        }
     }
 
 
