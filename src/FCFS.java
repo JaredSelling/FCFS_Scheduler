@@ -1,5 +1,3 @@
-import java.util.Collections;
-
 public class FCFS {
 
     public static void main(String[] args) {
@@ -69,7 +67,7 @@ public class FCFS {
                 //add process to end of ready queue
                 readyQueue.enqueue(curProc);
                 //rearrange ready queue based on arrival times
-                Collections.sort(readyQueue);
+        
                 //get next process
             }
         }
