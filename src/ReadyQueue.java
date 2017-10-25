@@ -1,29 +1,37 @@
+import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 
-public class ReadyQueue<T extends Comparable<? super T>> {
+public class ReadyQueue<Process extends Comparable<? super Process>> {
 
-    private LinkedList<T> readyQueue = new LinkedList<T>();
+    private List<Process> list = new LinkedList<Process>();
 
-    public void enqueue(T item) {
-        readyQueue.addLast(item);
+    public void enqueue(Process item) {
+        list.add(item);
     }
 
-    public T dequeue() {
-        return readyQueue.poll();
+    public Process dequeue() {
+        return list.remove(0);
     }
 
     public boolean hasProcesses() {
-        return !readyQueue.isEmpty();
+        return !list.isEmpty();
     }
 
     public int size() {
-        return readyQueue.size();
+        return list.size();
     }
 
-    public boolean isEmpty() { return readyQueue.isEmpty(); }
+    public boolean isEmpty() { return list.isEmpty(); }
 
 
-    public T getItem(int index) { return readyQueue.get(index);}
+    public Process getItem(int index) { return list.get(index);}
 
+    public void sort() {
+        Collections.sort(list);
+    }
 
+    public void remove(Process p) {
+        list.remove(p);
+    }
 }

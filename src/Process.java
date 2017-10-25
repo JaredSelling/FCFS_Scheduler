@@ -44,11 +44,11 @@ public class Process implements Comparable<Process> {
     }
 
     public int getCurrentBurst() {
-        return currentBurst;
+        return burstTimes[currentBurstIndex];
     }
 
     public int getCurrentIO() {
-        return currentIO;
+        return ioTimes[currentIOIndex];
     }
 
     public int getResponseTime() {
@@ -89,9 +89,13 @@ public class Process implements Comparable<Process> {
         this.currentBurst = this.burstTimes[this.currentBurstIndex];
     }
 
-    public void decrementCurrentBurst() { this.currentBurst--;}
+    public void decrementCurrentBurst() { this.burstTimes[currentBurstIndex]--;}
 
-    public void incrementCurrentBurst() { this.currentBurst++; }
+    public void incrementCurrentBurst() { this.burstTimes[currentBurstIndex]++; }
+
+    public void incrementCurrentIO() {this.ioTimes[currentIOIndex]++;}
+
+    public void decrementCurrentIO() {this.ioTimes[currentIOIndex]--;}
 
     public void setCurrentIO() {
         this.currentIO = ioTimes[this.currentIOIndex];
