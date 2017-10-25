@@ -1,3 +1,4 @@
+
 public class Process implements Comparable<Process> {
     private String id;
     private int arrivalTime;
@@ -5,7 +6,7 @@ public class Process implements Comparable<Process> {
     private int[] ioTimes;
     private int currentBurst;
     private int currentIO;
-    private int responseTime;
+    private Integer responseTime;
     private int waitingTime;
     private int turnaroundTime;
     private int currentBurstIndex;
@@ -67,6 +68,14 @@ public class Process implements Comparable<Process> {
         return state;
     }
 
+    public int getCurrentBurstIndex() {
+        return currentBurstIndex;
+    }
+
+    public int getCurrentIOIndex() {
+        return currentIOIndex;
+    }
+
     //Setters
 
     public void setArrivalTime(int arrivalTime) {
@@ -91,18 +100,18 @@ public class Process implements Comparable<Process> {
 
     public void decrementCurrentBurst() { this.burstTimes[currentBurstIndex]--;}
 
-    public void incrementCurrentBurst() { this.burstTimes[currentBurstIndex]++; }
+    public void incrementCurrentBurst() {if(this.currentBurstIndex < this.burstTimes.length) this.burstTimes[currentBurstIndex]++; }
 
-    public void incrementCurrentIO() {this.ioTimes[currentIOIndex]++;}
+    public void incrementCurrentIO() {if(this.currentIOIndex < this.ioTimes.length) this.ioTimes[currentIOIndex]++;}
 
-    public void decrementCurrentIO() {this.ioTimes[currentIOIndex]--;}
+    public void decrementCurrentIO() { this.ioTimes[currentIOIndex]--;}
 
     public void setCurrentIO() {
         this.currentIO = ioTimes[this.currentIOIndex];
     }
 
     public void setResponseTime(int responseTime) {
-        this.responseTime = responseTime;
+        if(this.responseTime == null) this.responseTime = responseTime;
     }
 
     public void setWaitingTime(int waitingTime) {
@@ -113,13 +122,28 @@ public class Process implements Comparable<Process> {
         this.turnaroundTime = turnaroundTime;
     }
 
-    public void incrementCurrentBurstIndex() { this.currentBurstIndex++; }
+    public void incrementCurrentBurstIndex() {if(this.currentBurstIndex < this.burstTimes.length-1) {this.currentBurstIndex++;} }
 
-    public void incrementCurrentIOIndex() { this.currentIOIndex++; }
+    public void incrementCurrentIOIndex() { if(this.currentIOIndex < this.ioTimes.length-1) {this.currentIOIndex++;} }
 
     public void setState(String state) {
         this.state = state;
     }
+
+    public boolean onlyZeros() {
+        for(int i : this.burstTimes) {
+            if(i != 0) {
+                return false;
+            }
+        }
+        for(int j : this.ioTimes) {
+            if(j != 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 
     @Override
     public int compareTo(Process comparedProc) {
