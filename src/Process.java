@@ -7,11 +7,12 @@ public class Process implements Comparable<Process> {
     private int currentBurst;
     private int currentIO;
     private Integer responseTime;
-    private int waitingTime;
-    private int turnaroundTime;
+    private Integer waitingTime;
+    private Integer turnaroundTime;
     private int currentBurstIndex;
     private int currentIOIndex;
     private String state;
+    private int totalBurstTime;
 
     //Constructor
 
@@ -23,6 +24,8 @@ public class Process implements Comparable<Process> {
         this.currentBurstIndex = 0;
         this.currentIOIndex = 0;
         this.state="READY";
+
+        this.totalBurstTime = calculateTotalBurstTime();
     }
 
 
@@ -40,9 +43,13 @@ public class Process implements Comparable<Process> {
         return burstTimes;
     }
 
+    public int getBurstTimesSize() { return this.burstTimes.length-1;}
+
     public int[] getIoTimes() {
         return ioTimes;
     }
+
+    public int getIOTimesSize() { return this.ioTimes.length-1;}
 
     public int getCurrentBurst() {
         return burstTimes[currentBurstIndex];
@@ -52,15 +59,15 @@ public class Process implements Comparable<Process> {
         return ioTimes[currentIOIndex];
     }
 
-    public int getResponseTime() {
+    public Integer getResponseTime() {
         return responseTime;
     }
 
-    public int getWaitingTime() {
+    public Integer getWaitingTime() {
         return waitingTime;
     }
 
-    public int getTurnaroundTime() {
+    public Integer getTurnaroundTime() {
         return turnaroundTime;
     }
 
@@ -74,6 +81,18 @@ public class Process implements Comparable<Process> {
 
     public int getCurrentIOIndex() {
         return currentIOIndex;
+    }
+
+    public int calculateTotalBurstTime() {
+        int sum = 0;
+        for(int i = 0; i<burstTimes.length; i++) {
+            sum += burstTimes[i];
+        }
+        return sum;
+    }
+
+    public int getTotalBurstTime() {
+        return totalBurstTime;
     }
 
     //Setters
@@ -119,7 +138,9 @@ public class Process implements Comparable<Process> {
     }
 
     public void setTurnaroundTime(int turnaroundTime) {
-        this.turnaroundTime = turnaroundTime;
+        if(this.turnaroundTime == null) {
+            this.turnaroundTime = turnaroundTime;
+        }
     }
 
     public void incrementCurrentBurstIndex() {if(this.currentBurstIndex < this.burstTimes.length-1) {this.currentBurstIndex++;} }
@@ -130,7 +151,7 @@ public class Process implements Comparable<Process> {
         this.state = state;
     }
 
-    public boolean onlyZeros() {
+    public boolean isComplete() {
         for(int i : this.burstTimes) {
             if(i != 0) {
                 return false;
@@ -144,6 +165,23 @@ public class Process implements Comparable<Process> {
         return true;
     }
 
+    public boolean executionComplete() {
+        for(int i : this.burstTimes) {
+            if(i != 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean ioComplete() {
+        for(int i : this.ioTimes) {
+            if(i != 0) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     @Override
     public int compareTo(Process comparedProc) {

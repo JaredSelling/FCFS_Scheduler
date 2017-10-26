@@ -34,4 +34,5 @@ public class ReadyQueue<Process extends Comparable<? super Process>> {
     public void remove(Process p) {
         list.remove(p);
     }
+
 }

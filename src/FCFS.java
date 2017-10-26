@@ -15,6 +15,8 @@ public class FCFS {
 
         ReadyQueue<Process> blockingQueue = new ReadyQueue<>();
 
+        ReadyQueue<Process> completeQueue = new ReadyQueue<>();
+
         //add processes to ready queue
         readyQueue.enqueue(P1);
         readyQueue.enqueue(P2);
@@ -53,23 +55,13 @@ public class FCFS {
         System.out.println("------------------------------------");
         System.out.println("------------------------------------");
 
+
         //main loop.  Each iteration represents 1 time unit.
-
-
-
-
-        while(!readyQueue.isEmpty()) {
+        while(!readyQueue.isEmpty() || blockingQueue.hasProcesses() || curProc != null) {
 
             //increment timer
             curTime++;
 
-            //test if process is complete
-            if(curProc.onlyZeros()) {
-                System.out.println(curProc.getId() + " HAS COMPLETED");
-                readyQueue.remove(curProc);
-                curProc = readyQueue.dequeue();
-                curProc.setState("READY");
-            }
 
             //decrement ioBurst of every process in blocking queue
             if(blockingQueue.hasProcesses()) {
@@ -80,16 +72,31 @@ public class FCFS {
                 for(int x = 0; x<blockingQueue.size(); x++) {
                     bQueueProc = blockingQueue.getItem(x);
 
+                    //decrement current io burst if it is greater than 0
                     if(bQueueProc.getCurrentIO() > 0) {
                         bQueueProc.decrementCurrentIO();
                     }
 
+                    //increment io index and mark process to be removed from blocking queue if its io burst = 0
                     if(bQueueProc.getCurrentIO() <= 0) {
                         bQueueProc.incrementCurrentIOIndex();
                         toRemove.enqueue(bQueueProc);
-                        bQueueProc.setState("READY");
-                        bQueueProc.setArrivalTime(curTime);
-                        readyQueue.enqueue(bQueueProc);
+                        //if process has completed all cpu and i/o bursts, it is complete
+                        if(bQueueProc.isComplete()) {
+                            bQueueProc.setTurnaroundTime(curTime);
+                            bQueueProc.setWaitingTime(bQueueProc.getTurnaroundTime() - bQueueProc.getTotalBurstTime());
+                            completeQueue.enqueue(bQueueProc);
+                            System.out.println(bQueueProc.getId() + " HAS COMPLETED");
+                        } else {
+                            bQueueProc.setState("READY");
+                            bQueueProc.setArrivalTime(curTime);
+                            readyQueue.enqueue(bQueueProc);
+                            if(curProc == null) {
+                                curProc = readyQueue.dequeue();
+                                curProc.setResponseTime(curTime);
+                            }
+                        }
+
                     }
                 }
 
@@ -99,108 +106,103 @@ public class FCFS {
                 }
             }
 
+            //curProc is null when there is no process in the ready queue.
+            if(curProc != null) {
+                //if state is EXECUTING
+                if(curProc.getState() == "EXECUTING") {
+                    //if current burst > 0
+                    if (curProc.getCurrentBurst() > 0) {
+                        //decrement current burst
+                        curProc.decrementCurrentBurst();
+                    }
 
+                    //if  current burst is 0
+                    if (curProc.getCurrentBurst() <= 0) {
+                        //increment process's cpu burst index
+                        curProc.incrementCurrentBurstIndex();
+                        //set state to BLOCKING
+                        curProc.setState("BLOCKING");
+                    }
 
-
-            //if state is EXECUTING
-            if(curProc.getState() == "EXECUTING") {
-                //if current burst > 0
-                if (curProc.getCurrentBurst() > 0) {
-                    //decrement current burst
-                    curProc.decrementCurrentBurst();
+                    //test if active process is complete
+                    if(curProc.isComplete()) {
+                        System.out.println(curProc.getId() + " HAS COMPLETED");
+                        curProc.setTurnaroundTime(curTime);
+                        curProc.setWaitingTime(curProc.getTurnaroundTime() - curProc.getTotalBurstTime());
+                        completeQueue.enqueue(curProc);
+                        readyQueue.remove(curProc);
+                        if(readyQueue.hasProcesses()) {
+                            curProc = readyQueue.dequeue();
+                            curProc.setResponseTime(curTime);
+                            curProc.setState("EXECUTING");
+                        } else {
+                            curProc = null;
+                            continue;
+                        }
+                    }
                 }
 
-                //if  current burst is 0
-                if (curProc.getCurrentBurst() <= 0) {
+                //if state is BLOCKING
+                if(curProc.getState() == "BLOCKING") {
+                    //current process's new arrival time = current time + current io time
+                    // curProc.setArrivalTime(curTime + curProc.getCurrentIO());
+                    blockingQueue.enqueue(curProc);
+                    readyQueue.remove(curProc);
+                    if(readyQueue.hasProcesses()) {
+                        curProc = readyQueue.dequeue();
+                        curProc.setResponseTime(curTime);
+                        curProc.setState("EXECUTING");
 
-                    //increment process's cpu burst index
-                    curProc.incrementCurrentBurstIndex();
+                        //output status info
+                        System.out.println("Current Time:   " + curTime);
+                        System.out.println("Now running:    " + curProc.getId());
+                        System.out.println("Current burst: " + curProc.getCurrentBurst());
+                        System.out.println("Current burst index: " + curProc.getCurrentBurstIndex() + "/" + curProc.getBurstTimesSize());
+                        System.out.println("Current io burst index: " + curProc.getCurrentIOIndex() + "/" + curProc.getIOTimesSize());
+                        System.out.println("------------------------------------");
+                        System.out.println("Ready Queue:    Process    Burst    ArrivalTime    CurBurstIndex    CurIOIndex");
+                        for(int i = 0; i<readyQueue.size(); i++) {
+                            System.out.println("                " + readyQueue.getItem(i).getId() + "         " + readyQueue.getItem(i).getCurrentBurst() +
+                                    "        " + readyQueue.getItem(i).getArrivalTime() + "            " + readyQueue.getItem(i).getCurrentBurstIndex() +
+                                    "/" + readyQueue.getItem(i).getBurstTimesSize() + "              " + readyQueue.getItem(i).getCurrentIOIndex() + "/" + readyQueue.getItem(i).getIOTimesSize());
+                        }
+                        System.out.println("------------------------------------");
+                        System.out.println("Now in I/O:     Process    Remaining I/O time    curIOIndex    curBurstIndex" );
+                        for(int j = 0; j<blockingQueue.size(); j++) {
+                            System.out.println("                " + blockingQueue.getItem(j).getId() + "         " + blockingQueue.getItem(j).getCurrentIO() +
+                                    "                     " + blockingQueue.getItem(j).getCurrentIOIndex() + "/" + blockingQueue.getItem(j).getIOTimesSize() +
+                                    "          " + blockingQueue.getItem(j).getCurrentBurstIndex() + "/" + blockingQueue.getItem(j).getBurstTimesSize()
+                            );
 
-                    //set state to BLOCKING
-                    curProc.setState("BLOCKING");
+                        }
+                        System.out.println("------------------------------------");
+                        System.out.println("------------------------------------");
+                    } else {
+                        curProc = null;
+                        continue;
+                    }
                 }
-            }
 
-            //if state is BLOCKING
-            if(curProc.getState() == "BLOCKING") {
-                //current process's new arrival time = current time + current io time
-               // curProc.setArrivalTime(curTime + curProc.getCurrentIO());
-                blockingQueue.enqueue(curProc);
-                readyQueue.remove(curProc);
-                curProc = readyQueue.dequeue();
-                curProc.setState("EXECUTING");
-                //increment process's current io burst index
-               // curProc.incrementCurrentIOIndex();
-                //set process's state to READY
-                //curProc.setState("READY");
-            }
-
-            //if state is READY
+                //if state is READY
                 //add process to end of ready queue
-            if(curProc.getState() == "READY") {
-                readyQueue.enqueue(curProc);
-                //rearrange ready queue based on arrival times
-               //readyQueue.sort();
-                //get next process
-                curProc = readyQueue.dequeue();
-                curProc.setState("EXECUTING");
-            }
-
-            //if ready queue is empty, finish all processes in IO
-            if(readyQueue.isEmpty()) {
-                while(!blockingQueue.isEmpty()) {
-                    //decrement ioBurst of every process in blocking queue
-
-                        //new queue to hold items to remove from the blocking queue
-                        ReadyQueue<Process> toRemove = new ReadyQueue<>();
-
-                        for(int x = 0; x<blockingQueue.size(); x++) {
-                            bQueueProc = blockingQueue.getItem(x);
-
-                            if(bQueueProc.getCurrentIO() > 0) {
-                                bQueueProc.decrementCurrentIO();
-                            }
-
-                            if(bQueueProc.getCurrentIO() <= 0) {
-                                bQueueProc.incrementCurrentIOIndex();
-                                toRemove.enqueue(bQueueProc);
-                            }
-                        }
-
-                        //remove from the blocking queue all processes that are in toRemove
-                        for(int y=0; y<toRemove.size(); y++) {
-                            blockingQueue.remove(toRemove.getItem(y));
-                        }
-
+                if(curProc.getState() == "READY") {
+                    readyQueue.enqueue(curProc);
+                    //rearrange ready queue based on arrival times
+                    //readyQueue.sort();
+                    //get next process
+                    curProc = readyQueue.dequeue();
+                    curProc.setResponseTime(curTime);
+                    curProc.setState("EXECUTING");
                 }
             }
-
-
-            //output status info
-            System.out.println("Current Time:   " + curTime);
-            System.out.println("Now running:    " + curProc.getId());
-            System.out.println("Current burst: " + curProc.getCurrentBurst());
-            System.out.println("Current burst index: " + curProc.getCurrentBurstIndex());
-            System.out.println("Current io burst index: " + curProc.getCurrentIOIndex());
-            System.out.println("------------------------------------");
-            System.out.println("Ready Queue:    Process    Burst    ArrivalTime    CurBurstIndex");
-            for(int i = 0; i<readyQueue.size(); i++) {
-                System.out.println("                " + readyQueue.getItem(i).getId() + "         " + readyQueue.getItem(i).getCurrentBurst() + "        " + readyQueue.getItem(i).getArrivalTime() + "            " + readyQueue.getItem(i).getCurrentBurstIndex());
-            }
-            System.out.println("------------------------------------");
-            System.out.println("Now in I/O:     Process    Remaining I/O time    curIOIndex" );
-            for(int j = 0; j<blockingQueue.size(); j++) {
-                System.out.println("                " + blockingQueue.getItem(j).getId() + "         " + blockingQueue.getItem(j).getCurrentIO() + "                     " + blockingQueue.getItem(j).getCurrentIOIndex());
-
-            }
-            System.out.println("------------------------------------");
-            System.out.println("------------------------------------");
-
         }
+        System.out.println("------------------------------------");
+        System.out.println("Current time: " + curTime);
+        System.out.println("Complete:    Process    RT    WT    TT");
+        for(int z = 0; z<completeQueue.size(); z++) {
+            System.out.println("             " + completeQueue.getItem(z).getId() + "         " + completeQueue.getItem(z).getResponseTime() + "     " + completeQueue.getItem(z).getWaitingTime() + "   " + completeQueue.getItem(z).getTurnaroundTime());
+        }
+
+
     }
-
-
-
-
-
 }
