@@ -3,13 +3,13 @@ public class FCFS {
     public static void main(String[] args) {
         //instantiate processes
         Process P1 = new Process("P1", new int[]{4, 5, 6, 7, 6, 4, 5, 4}, new int[]{15, 31, 26, 24, 41, 51, 16}, 0);
-        Process P2 = new Process("P2", new int[]{9, 11, 15, 12, 8, 11, 9, 10, 7}, new int[]{28, 22, 21, 12, 8, 11, 9, 10}, 0);
+        Process P2 = new Process("P2", new int[]{9, 11, 15, 12, 8, 11, 9, 10, 7}, new int[]{28, 22, 21, 28, 34, 34, 29, 31}, 0);
         Process P3 = new Process("P3", new int[]{24, 12, 6, 17, 11, 22, 18}, new int[]{28, 21, 27, 21, 54, 31}, 0);
         Process P4 = new Process("P4", new int[]{15, 14, 16, 18, 14, 13, 16, 15}, new int[]{35, 41, 45, 51, 61, 54, 61}, 0);
-        Process P5 = new Process("P5", new int[]{6, 5, 15, 4, 7, 4, 6, 10, 3 }, new int[]{22, 21, 31, 26, 31, 18, 21, 33}, 0);
+        Process P5 = new Process("P5", new int[]{6, 5, 15, 4, 7, 4, 6, 10, 3}, new int[]{22, 21, 31, 26, 31, 18, 21, 33}, 0);
         Process P6 = new Process("P6", new int[]{22, 27, 25, 11, 19, 18, 6, 6}, new int[]{38, 41, 29, 26, 32, 22, 26}, 0);
         Process P7 = new Process("P7", new int[]{4, 7, 6, 5, 4, 7, 6, 5, 6, 9}, new int[]{36, 31, 32, 41, 42, 39, 33, 34, 21}, 0);
-        Process P8 = new Process("P8", new int[]{5, 4, 6, 4, 6, 5, 4, 6, 6}, new int[]{14, 33, 31, 31, 37, 21, 19, 11}, 0);
+        Process P8 = new Process("P8", new int[]{5, 4, 6, 4, 6, 5, 4, 6, 6}, new int[]{14, 33, 31, 31, 27, 21, 19, 11}, 0);
 
         ReadyQueue<Process> readyQueue = new ReadyQueue<Process>();
 
@@ -32,6 +32,9 @@ public class FCFS {
 
         //initialize timer
         int curTime = 0;
+
+        //count time that cpu is idle
+        int idleTime = 0;
 
         //get first process in queue and set its state to EXECUTING
         Process curProc = readyQueue.dequeue();
@@ -130,7 +133,7 @@ public class FCFS {
                         curProc.setTurnaroundTime(curTime);
                         curProc.setWaitingTime(curProc.getTurnaroundTime() - curProc.getTotalBurstTime());
                         completeQueue.enqueue(curProc);
-                        readyQueue.remove(curProc);
+
                         if(readyQueue.hasProcesses()) {
                             curProc = readyQueue.dequeue();
                             curProc.setResponseTime(curTime);
@@ -147,7 +150,7 @@ public class FCFS {
                     //current process's new arrival time = current time + current io time
                     // curProc.setArrivalTime(curTime + curProc.getCurrentIO());
                     blockingQueue.enqueue(curProc);
-                    readyQueue.remove(curProc);
+
                     if(readyQueue.hasProcesses()) {
                         curProc = readyQueue.dequeue();
                         curProc.setResponseTime(curTime);
@@ -187,22 +190,30 @@ public class FCFS {
                 //add process to end of ready queue
                 if(curProc.getState() == "READY") {
                     readyQueue.enqueue(curProc);
-                    //rearrange ready queue based on arrival times
-                    //readyQueue.sort();
-                    //get next process
                     curProc = readyQueue.dequeue();
                     curProc.setResponseTime(curTime);
                     curProc.setState("EXECUTING");
                 }
+            } else {
+                idleTime++;
             }
         }
         System.out.println("------------------------------------");
         System.out.println("Current time: " + curTime);
+        System.out.println("Idle time: " + idleTime);
+        double cpuUtil = 100 - (((double)idleTime/(double)curTime) * 100);
+        double rtSum = 0;
+        double wtSum = 0;
+        double ttSum = 0;
+        System.out.println("Cpu Utilization: " + cpuUtil + "%");
         System.out.println("Complete:    Process    RT    WT    TT");
         for(int z = 0; z<completeQueue.size(); z++) {
             System.out.println("             " + completeQueue.getItem(z).getId() + "         " + completeQueue.getItem(z).getResponseTime() + "     " + completeQueue.getItem(z).getWaitingTime() + "   " + completeQueue.getItem(z).getTurnaroundTime());
+            rtSum += completeQueue.getItem(z).getResponseTime();
+            wtSum += completeQueue.getItem(z).getWaitingTime();
+            ttSum += completeQueue.getItem(z).getTurnaroundTime();
         }
-
+        System.out.println("Avg:                    " + rtSum/8 + "   " + wtSum/8 + "  " + ttSum/8);
 
     }
 }

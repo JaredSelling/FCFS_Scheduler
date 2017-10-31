@@ -1,6 +1,6 @@
 import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+        import java.util.LinkedList;
+        import java.util.List;
 
 public class ReadyQueue<Process extends Comparable<? super Process>> {
 
