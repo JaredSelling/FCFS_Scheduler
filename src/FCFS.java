@@ -45,9 +45,9 @@ public class FCFS {
         System.out.println("Now running:    " + curProc.getId());
         System.out.println("Current burst: " + curProc.getCurrentBurst());
         System.out.println("------------------------------------");
-        System.out.println("Ready Queue:    Process    Burst    ArrivalTime");
+        System.out.println("Ready Queue:    Process    Burst");
         for(int i = 0; i<readyQueue.size(); i++) {
-            System.out.println("                " + readyQueue.getItem(i).getId() + "         " + readyQueue.getItem(i).getCurrentBurst() + "        " + readyQueue.getItem(i).getArrivalTime());
+            System.out.println("                " + readyQueue.getItem(i).getId() + "         " + readyQueue.getItem(i).getCurrentBurst());
         }
         System.out.println("------------------------------------");
         System.out.println("Now in I/O:     Process    Remaining I/O time");
@@ -89,7 +89,9 @@ public class FCFS {
                             bQueueProc.setTurnaroundTime(curTime);
                             bQueueProc.setWaitingTime(bQueueProc.getTurnaroundTime() - bQueueProc.getTotalBurstTime());
                             completeQueue.enqueue(bQueueProc);
+                            System.out.println("Current time: " + curTime);
                             System.out.println(bQueueProc.getId() + " HAS COMPLETED");
+                            System.out.println("----------------------------------");
                         } else {
                             bQueueProc.setState("READY");
                             bQueueProc.setArrivalTime(curTime);
@@ -129,7 +131,9 @@ public class FCFS {
 
                     //test if active process is complete
                     if(curProc.isComplete()) {
+                        System.out.println("Current time: " + curTime);
                         System.out.println(curProc.getId() + " HAS COMPLETED");
+                        System.out.println("----------------------------------");
                         curProc.setTurnaroundTime(curTime);
                         curProc.setWaitingTime(curProc.getTurnaroundTime() - curProc.getTotalBurstTime());
                         completeQueue.enqueue(curProc);
@@ -163,19 +167,14 @@ public class FCFS {
                         System.out.println("Current burst index: " + curProc.getCurrentBurstIndex() + "/" + curProc.getBurstTimesSize());
                         System.out.println("Current io burst index: " + curProc.getCurrentIOIndex() + "/" + curProc.getIOTimesSize());
                         System.out.println("------------------------------------");
-                        System.out.println("Ready Queue:    Process    Burst    ArrivalTime    CurBurstIndex    CurIOIndex");
+                        System.out.println("Ready Queue:    Process    Burst");
                         for(int i = 0; i<readyQueue.size(); i++) {
-                            System.out.println("                " + readyQueue.getItem(i).getId() + "         " + readyQueue.getItem(i).getCurrentBurst() +
-                                    "        " + readyQueue.getItem(i).getArrivalTime() + "            " + readyQueue.getItem(i).getCurrentBurstIndex() +
-                                    "/" + readyQueue.getItem(i).getBurstTimesSize() + "              " + readyQueue.getItem(i).getCurrentIOIndex() + "/" + readyQueue.getItem(i).getIOTimesSize());
+                            System.out.println("                " + readyQueue.getItem(i).getId() + "         " + readyQueue.getItem(i).getCurrentBurst());
                         }
                         System.out.println("------------------------------------");
-                        System.out.println("Now in I/O:     Process    Remaining I/O time    curIOIndex    curBurstIndex" );
+                        System.out.println("Now in I/O:     Process    Remaining I/O time" );
                         for(int j = 0; j<blockingQueue.size(); j++) {
-                            System.out.println("                " + blockingQueue.getItem(j).getId() + "         " + blockingQueue.getItem(j).getCurrentIO() +
-                                    "                     " + blockingQueue.getItem(j).getCurrentIOIndex() + "/" + blockingQueue.getItem(j).getIOTimesSize() +
-                                    "          " + blockingQueue.getItem(j).getCurrentBurstIndex() + "/" + blockingQueue.getItem(j).getBurstTimesSize()
-                            );
+                            System.out.println("                " + blockingQueue.getItem(j).getId() + "         " + blockingQueue.getItem(j).getCurrentIO());
 
                         }
                         System.out.println("------------------------------------");
@@ -208,7 +207,8 @@ public class FCFS {
         System.out.println("Cpu Utilization: " + cpuUtil + "%");
         System.out.println("Complete:    Process    RT    WT    TT");
         for(int z = 0; z<completeQueue.size(); z++) {
-            System.out.println("             " + completeQueue.getItem(z).getId() + "         " + completeQueue.getItem(z).getResponseTime() + "     " + completeQueue.getItem(z).getWaitingTime() + "   " + completeQueue.getItem(z).getTurnaroundTime());
+            System.out.println("             " + completeQueue.getItem(z).getId() + "         " + completeQueue.getItem(z).getResponseTime() + "     " +
+                    completeQueue.getItem(z).getWaitingTime() + "   " + completeQueue.getItem(z).getTurnaroundTime());
             rtSum += completeQueue.getItem(z).getResponseTime();
             wtSum += completeQueue.getItem(z).getWaitingTime();
             ttSum += completeQueue.getItem(z).getTurnaroundTime();
