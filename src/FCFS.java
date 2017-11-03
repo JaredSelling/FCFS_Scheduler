@@ -160,27 +160,10 @@ public class FCFS {
                         curProc.setResponseTime(curTime);
                         curProc.setState("EXECUTING");
 
-                        //output status info
-                        System.out.println("Current Time:   " + curTime);
-                        System.out.println("Now running:    " + curProc.getId());
-                        System.out.println("Current burst: " + curProc.getCurrentBurst());
-                        System.out.println("Current burst index: " + curProc.getCurrentBurstIndex() + "/" + curProc.getBurstTimesSize());
-                        System.out.println("Current io burst index: " + curProc.getCurrentIOIndex() + "/" + curProc.getIOTimesSize());
-                        System.out.println("------------------------------------");
-                        System.out.println("Ready Queue:    Process    Burst");
-                        for(int i = 0; i<readyQueue.size(); i++) {
-                            System.out.println("                " + readyQueue.getItem(i).getId() + "         " + readyQueue.getItem(i).getCurrentBurst());
-                        }
-                        System.out.println("------------------------------------");
-                        System.out.println("Now in I/O:     Process    Remaining I/O time" );
-                        for(int j = 0; j<blockingQueue.size(); j++) {
-                            System.out.println("                " + blockingQueue.getItem(j).getId() + "         " + blockingQueue.getItem(j).getCurrentIO());
-
-                        }
-                        System.out.println("------------------------------------");
-                        System.out.println("------------------------------------");
+                        displayInfo(readyQueue, blockingQueue, completeQueue, curProc, curTime);
                     } else {
                         curProc = null;
+                        displayInfo(readyQueue, blockingQueue, completeQueue, curProc, curTime);
                         continue;
                     }
                 }
@@ -215,5 +198,39 @@ public class FCFS {
         }
         System.out.println("Avg:                    " + rtSum/8 + "   " + wtSum/8 + "  " + ttSum/8);
 
+    }
+
+    public static void displayInfo(ReadyQueue<Process> readyQueue, ReadyQueue<Process> blockingQueue, ReadyQueue<Process> completeQueue, Process curProc, int curTime) {
+        if(curProc == null) {
+            System.out.println("Current time: " + curTime);
+            System.out.println("CPU IS IDLE");
+            System.out.println("------------------------------------");
+        } else {
+            //output status info
+            System.out.println("Current Time:   " + curTime);
+            System.out.println("Now running:    " + curProc.getId());
+            System.out.println("Current burst: " + curProc.getCurrentBurst());
+            System.out.println("Current burst index: " + curProc.getCurrentBurstIndex() + "/" + curProc.getBurstTimesSize());
+            System.out.println("Current io burst index: " + curProc.getCurrentIOIndex() + "/" + curProc.getIOTimesSize());
+            System.out.println("------------------------------------");
+            System.out.println("Ready Queue:    Process    Burst");
+            for (int i = 0; i < readyQueue.size(); i++) {
+                System.out.println("                " + readyQueue.getItem(i).getId() + "         " + readyQueue.getItem(i).getCurrentBurst());
+            }
+            System.out.println("------------------------------------");
+            System.out.println("Now in I/O:     Process    Remaining I/O time");
+            for (int j = 0; j < blockingQueue.size(); j++) {
+                System.out.println("                " + blockingQueue.getItem(j).getId() + "         " + blockingQueue.getItem(j).getCurrentIO());
+
+            }
+            System.out.println("------------------------------------");
+            System.out.println("Complete:     Process");
+            for (int k = 0; k < completeQueue.size(); k++) {
+                System.out.println("                " + completeQueue.getItem(k).getId());
+
+            }
+            System.out.println("------------------------------------");
+            System.out.println("------------------------------------");
+        }
     }
 }
